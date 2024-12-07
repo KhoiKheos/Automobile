@@ -1,14 +1,16 @@
 #include <Servo.h>
 #define PIN_DO 2
-volatile unsigned int pulsesLeft = 0;   // Số xung của bánh trái
-volatile unsigned int pulsesRight = 0;  // Số xung của bánh phải
-float rpm;
-unsigned long timeOld;
+
 #define HOLES_DISC 20  // Số lỗ trên đĩa encoder
 #define WHEEL_CIRCUMFERENCE 20.42  // Chu vi bánh xe (cm)
 #define TARGET_DISTANCE 120  // Khoảng cách cần di chuyển (cm)
 #define TARGET_PULSES ((TARGET_DISTANCE / 20) * 60)  // Số xung cần thiết 60.
 Servo servo;
+
+volatile unsigned int pulsesLeft = 0;   // Số xung của bánh trái
+volatile unsigned int pulsesRight = 0;  // Số xung của bánh phải
+float rpm;
+unsigned long timeOld;
 
 const int trigPin = 13;
 const int echoPin = 12;
@@ -59,10 +61,11 @@ void goBoth(int speedLeft, int speedRight) {
 
 void countEncoderLeft() {
     encoderCountLeft++;
+    pulsesLeft++;
 }
-
 void countEncoderRight() {
     encoderCountRight++;
+    pulsesRight++;
 }
 
 unsigned int readDistance() {
@@ -146,17 +149,21 @@ void loop() {
     }
 
     if (encoderMode) {
+        pulsesLeft = 0;
+        pulsesRight = 0;
+          Serial.println(pulsesLeft);
+          Serial.println(pulsesRight);
         // Chế độ Encoder Mode
             if (pulsesLeft < TARGET_PULSES && pulsesRight < TARGET_PULSES) {
             // Cấu hình động cơ trái quay thuận
             digitalWrite(in1Pin, HIGH);
             digitalWrite(in2Pin, LOW);
-            analogWrite(enAPin, 250);  // Động cơ trái quay với tốc độ 100%
+            analogWrite(enAPin, 255);  // Động cơ trái quay với tốc độ 100%
 
             // Cấu hình động cơ phải quay thuận
             digitalWrite(in3Pin, HIGH);
             digitalWrite(in4Pin, LOW);
-            analogWrite(enBPin, 250);  // Động cơ phải quay với tốc độ 100%
+            analogWrite(enBPin, 255);  // Động cơ phải quay với tốc độ 100%
             } 
      
             else {
@@ -167,20 +174,17 @@ void loop() {
                 Serial.println(encoderCountRight);
                 Serial.println(encoderCountLeft);
                 // while(1);  // Dừng chương trình sau khi đạt yêu cầu
-                while ((encoderCountLeft + encoderCountRight) / 2 < 200) {
+                delay(50);
                 goBoth(-170, -170); // Lùi
                 // reverseSpeed = min(reverseSpeed + 10, 255); // Tăng tốc mỗi chu kỳ
-                // delay(50); // Cho phép tốc độ tăng dần mượt mà
-              }
+                delay(50); // Cho phép tốc độ tăng dần mượt mà
+                goBoth(0, 0); // Dừng lại sau khi lùi 200 xung
+                Serial.println("Dừng và thoát chế độ Encoder");
+                toggleEncoderMode(); // Thoát chế độ Encoder Mode
+              
             }
 
-            // Lùi 200 xung
-            
-
-            goBoth(0, 0); // Dừng lại sau khi lùi 200 xung
-            Serial.println("Lùi 200 xung. Thoát chế độ Encoder Mode.");
-            toggleEncoderMode(); // Thoát chế độ Encoder Mode
-        }
+    }
     else {
         // Chế độ chạy bình thường (tránh vật cản)
         unsigned long currentMillis = millis();
@@ -199,11 +203,11 @@ void loop() {
             }
 
             if (tooClose) {
-                goBoth(-150, -150); // Lùi lại một chút
-                delay(500);
-                goBoth(0, 0);
+                goBoth(-170, -170); // Lùi lại một chút
+                delay(50);
+                
             } else {
-                goBoth(250, 250); // Chạy bình thường
+                goBoth(255, 255); // Chạy bình thường
             }
         }
     }
