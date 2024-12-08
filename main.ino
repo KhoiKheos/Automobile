@@ -60,11 +60,9 @@ void goBoth(int speedLeft, int speedRight) {
 }
 
 void countEncoderLeft() {
-    encoderCountLeft++;
     pulsesLeft++;
 }
 void countEncoderRight() {
-    encoderCountRight++;
     pulsesRight++;
 }
 
@@ -91,8 +89,8 @@ void readNextDistance() {
 void toggleEncoderMode() {
     encoderMode = !encoderMode; // Chuyển đổi trạng thái
     if (encoderMode) {
-        encoderCountLeft = 0;  // Reset encoder khi vào chế độ
-        encoderCountRight = 0;
+        pulsesLeft = 0;   
+        pulsesRight = 0; 
         Serial.println("Chuyển sang chế độ Encoder Mode.");
     } else {
         Serial.println("Thoát chế độ Encoder Mode.");
@@ -121,7 +119,7 @@ void setup() {
     pinMode(soundSensorPin, INPUT);
     servo.attach(servoPin);servo.write(90);
 
-    goBoth(0, 0);
+    //goBoth(0, 0);
 
     Serial.print("Brumm brumm !!");
     //Serial.println(encoderModePulses);
@@ -149,8 +147,6 @@ void loop() {
     }
 
     if (encoderMode) {
-        pulsesLeft = 0;
-        pulsesRight = 0;
           Serial.println(pulsesLeft);
           Serial.println(pulsesRight);
         // Chế độ Encoder Mode
@@ -168,8 +164,8 @@ void loop() {
      
             else {
                 // Dừng động cơ khi đạt đủ xung
-                analogWrite(enAPin, 0);
-                analogWrite(enBPin, 0);
+                // analogWrite(enAPin, 0);
+                // analogWrite(enBPin, 0);
                 Serial.println("Đã di chuyển đủ khoảng cách !");
                 Serial.println(encoderCountRight);
                 Serial.println(encoderCountLeft);
@@ -177,7 +173,7 @@ void loop() {
                 delay(50);
                 goBoth(-170, -170); // Lùi
                 // reverseSpeed = min(reverseSpeed + 10, 255); // Tăng tốc mỗi chu kỳ
-                delay(50); // Cho phép tốc độ tăng dần mượt mà
+                delay(3000); // Cho phép tốc độ tăng dần mượt mà
                 goBoth(0, 0); // Dừng lại sau khi lùi 200 xung
                 Serial.println("Dừng và thoát chế độ Encoder");
                 toggleEncoderMode(); // Thoát chế độ Encoder Mode
