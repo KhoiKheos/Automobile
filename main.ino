@@ -4,7 +4,8 @@
 #define HOLES_DISC 20  // Số lỗ trên đĩa encoder
 #define WHEEL_CIRCUMFERENCE 20.42  // Chu vi bánh xe (cm)
 #define TARGET_DISTANCE 120  // Khoảng cách cần di chuyển (cm)
-#define TARGET_PULSES ((TARGET_DISTANCE / 20) * 60)  // Số xung cần thiết 60.
+#define TARGET_PULSES ((TARGET_DISTANCE / 20) * 60)  // Số xung cần thiết 60, tính kèm sai số.
+
 Servo servo;
 
 volatile unsigned int pulsesLeft = 0;   // Số xung của bánh trái
@@ -35,10 +36,6 @@ volatile long encoderCountRight = 0;
 const float wheelDiameter = 65.0;
 const int pulsesPerRevolution = 20;
 const float wheelCircumference = 3.1416 * wheelDiameter;
-
-// Quãng đường cần đi trong chế độ Encoder Mode (10,000 mm)
-//const float encoderModeDistance = 10000.0;
-//long encoderModePulses = (encoderModeDistance / wheelCircumference) * pulsesPerRevolution;
 
 #define NUM_ANGLES 7
 unsigned char sensorAngle[NUM_ANGLES] = {50 ,60, 70, 80, 90, 100, 110};
@@ -169,13 +166,11 @@ void loop() {
                 Serial.println("Đã di chuyển đủ khoảng cách !");
                 Serial.println(encoderCountRight);
                 Serial.println(encoderCountLeft);
-                // while(1);  // Dừng chương trình sau khi đạt yêu cầu
-                delay(50);
-                goBoth(-170, -170); // Lùi
-                // reverseSpeed = min(reverseSpeed + 10, 255); // Tăng tốc mỗi chu kỳ
-                delay(3000); // Cho phép tốc độ tăng dần mượt mà
+                
                 goBoth(0, 0); // Dừng lại sau khi lùi 200 xung
+
                 Serial.println("Dừng và thoát chế độ Encoder");
+                delay(3000);
                 toggleEncoderMode(); // Thoát chế độ Encoder Mode
               
             }
